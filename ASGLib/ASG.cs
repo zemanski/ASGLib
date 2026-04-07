@@ -54,7 +54,7 @@ namespace ASGLib
         //Generic Json Serializer
         protected string ToJson()
         {
-            var dto = new Data.ASGDTO<TMoveDTO>
+            Data.ASGDTO<TMoveDTO> dto = new Data.ASGDTO<TMoveDTO>
             {
                 GameEvent   = gameEvent,
                 GameSite    = gameSite,
