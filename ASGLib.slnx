@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="ASGETest/ASGTest.csproj" />
+  <Project Path="ASGTest/ASGTest.csproj" />
   <Project Path="ASGLib/ASGLib.csproj" />
 </Solution>
