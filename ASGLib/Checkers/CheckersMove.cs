@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-//Nested Checkers Namespace : Implementable Checkers Match Class
+//Nested Checkers Namespace : Checkers Move and Move Data Transfer Object
 namespace ASGLib.Checkers
 {
 
@@ -18,8 +18,11 @@ namespace ASGLib.Checkers
         public string Comment { get; set; }
     }
 
+    //Class for Checkers Move : Parses Standardized Checkers Move Format
     public class CheckersMove : ASGMove<CheckersMoveDTO>
     {
+
+        // --- CHECKERS MOVE DATA ---
         private static readonly Dictionary<int, string> SquareMap = new Dictionary<int, string>
         {
             {  1, "b8" }, {  2, "d8" }, {  3, "f8" }, {  4, "h8" },
@@ -31,26 +34,8 @@ namespace ASGLib.Checkers
             { 25, "b2" }, { 26, "d2" }, { 27, "f2" }, { 28, "h2" },
             { 29, "a1" }, { 30, "c1" }, { 31, "e1" }, { 32, "g1" }
         };
-
         private static readonly char WhiteKingRank = '1';
         private static readonly char BlackKingRank = '8';
-
-        private List<string> steps;
-        private bool isJump;
-        private bool isPromotion;
-        private string comment;
-
-        internal CheckersMove(string moveString) : base(moveString)
-        {
-            steps = new List<string>();
-            comment = "";
-            isJump = false;
-            isPromotion = false;
-
-            MoveValidator();
-            SelfParse();
-        }
-
         private static string SqrToAlg(string squareStr, string body)
         {
             if (!int.TryParse(squareStr, out int squareNum))
@@ -62,6 +47,40 @@ namespace ASGLib.Checkers
             return algebraic;
         }
 
+        // --- CHECKERS MOVE MEMBERS ---
+        private List<string> steps;
+        private bool         isJump;
+        private bool         isPromotion;
+        private string       comment;
+
+        // --- CHECKERS MOVE CONSTRUCTOR ---
+        internal CheckersMove(string moveString) : base(moveString)
+        {
+            steps = new List<string>();
+            comment = "";
+            isJump = false;
+            isPromotion = false;
+
+            MoveValidator();
+            SelfParse();
+        }
+
+        // --- CHECKERS MOVE SERIALIZER ---
+        internal override CheckersMoveDTO ToDTO()
+        {
+            return new CheckersMoveDTO
+            {
+                MoveString = GetMove(),
+                TurnNum = turnNum,
+                TurnPlayer = turnPlayer,
+                Steps = steps,
+                IsJump = isJump,
+                IsPromotion = isPromotion,
+                Comment = comment
+            };
+        }
+
+        // --- CHECKERS MOVE VALIDATOR ---
         private void MoveValidator()
         {
             string move = GetMove();
@@ -69,23 +88,21 @@ namespace ASGLib.Checkers
             if (!Regex.IsMatch(move, @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$")) throw new Exception("Invalid checkers move format: " + move);
         }
 
+        // --- CHECKERS MOVE PARSING ---
         private void SelfParse()
         {
             Match match = Regex.Match(GetMove(), @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$");
-            if (!match.Success) throw new Exception("Failed to parse checkers move: " + GetMove());
 
             turnNum = int.Parse(match.Groups[1].Value);
             turnPlayer = match.Groups[2].Value == "." ? "White" : "Black";
-
             string body = match.Groups[3].Value.Trim();
             comment = match.Groups[4].Value;
 
-            ParseBody(body);
+            ParseMove(body);
         }
 
-        private void ParseBody(string body)
+        private void ParseMove(string body)
         {
-            //Detect Jump vs Simple Move by Separator
             List<string> rawSteps;
             if (body.Contains('x'))
             {
@@ -102,25 +119,20 @@ namespace ASGLib.Checkers
                 throw new Exception("Invalid checkers move body — no separator found: " + body);
             }
 
-            //Validate All Raw Steps are Numeric Before Conversion
             foreach (string step in rawSteps)
             {
                 if (!Regex.IsMatch(step, @"^\d+$"))
                     throw new Exception("Invalid square number '" + step + "' in checkers move body: " + body);
             }
 
-            //Validate Step Count : Simple Move Must Have Exactly Two Squares
             if (!isJump && rawSteps.Count != 2)
                 throw new Exception("Simple checkers move must have exactly two squares: " + body);
 
-            //Validate Step Count : Jump Must Have at Least Two Squares
             if (isJump && rawSteps.Count < 2)
                 throw new Exception("Jump checkers move must have at least two squares: " + body);
 
-            //Convert All Square Numbers to Algebraic Coordinates
             steps = rawSteps.Select(s => SqrToAlg(s, body)).ToList();
 
-            //Infer King Row : Check if Destination Rank Matches King Row for Moving Player
             string destination = steps[steps.Count - 1];
             char destinationRank = destination[1];
 
@@ -129,20 +141,7 @@ namespace ASGLib.Checkers
                 : destinationRank == BlackKingRank;
         }
 
-        internal override CheckersMoveDTO ToDTO()
-        {
-            return new CheckersMoveDTO
-            {
-                MoveString = GetMove(),
-                TurnNum = turnNum,
-                TurnPlayer = turnPlayer,
-                Steps = steps,
-                IsJump = isJump,
-                IsPromotion = isPromotion,
-                Comment = comment
-            };
-        }
-
+        // --- CHECKERS MOVE ACCESSORS ---
         public static Dictionary<string, object> GetMoveData(CheckersMove move)
         {
             return new Dictionary<string, object>
@@ -155,15 +154,9 @@ namespace ASGLib.Checkers
             };
         }
 
-        //Accessor for Comment
         public static string GetMoveComment(CheckersMove move)
         {
             return move.comment;
-        }
-
-        public string DEBUG_GetMove()
-        {
-            return GetMove();
         }
     }
 }

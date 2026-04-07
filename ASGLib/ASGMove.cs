@@ -10,7 +10,8 @@ namespace ASGLib
 {
 
     //Abstract Class for an Abstract Strategy Game Move
-    public abstract class ASGMove<TMoveDTO> where TMoveDTO : Data.ASGMoveDTO
+    public abstract class ASGMove<TMoveDTO> 
+        where TMoveDTO : Data.ASGMoveDTO
     {
 
         //Universal Properties : moveString is immutable, turnNum and turnPlayer are optional for declaration

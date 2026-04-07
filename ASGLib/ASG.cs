@@ -13,10 +13,13 @@ namespace ASGLib
 {
 
     //Abstract Class for an Abstract Strategy Game Match : Constrained by ASGMove's Decendants and Inputs as well as Decendant Class for Serialization/Deserialization
-    public abstract class ASG<TASG, TMove, TMoveDTO> where TASG : ASG<TASG, TMove, TMoveDTO> where TMove : ASGMove<TMoveDTO> where TMoveDTO : ASGMoveDTO
+    public abstract class ASG<TASG, TMove, TMoveDTO> 
+        where TASG : ASG<TASG, TMove, TMoveDTO> 
+        where TMove : ASGMove<TMoveDTO> 
+        where TMoveDTO : ASGMoveDTO
     {
 
-        //Immutable Game Filepath : Set on Declaration for New or Non-Serialized Game Objects 
+        //Immutable Game Filepath : Set on Declaration
         private String gameFilePath;
 
         //Feilds Required by PGN (Default for PDN)
@@ -33,7 +36,7 @@ namespace ASGLib
         //Generic Moveset
         protected List<TMove> moves;
 
-        //Constructor : Accessible by Child Constructor Chain
+        //Constructor : Called by Child Constructor
         protected ASG(String gameFilePath)
         {
             this.gameFilePath = gameFilePath;
@@ -47,7 +50,7 @@ namespace ASGLib
             this.moves        = new List<TMove>();
         }
 
-        //Abstract Json Moves Serializer and Move Deserializer Contracts
+        //Json Moves Serializer and Move Deserializer Contracts
         protected abstract TMove MoveFromDTO(TMoveDTO dto);
         protected abstract List<TMoveDTO> MovesToDTO();
 
@@ -68,12 +71,12 @@ namespace ASGLib
             return JsonSerializer.Serialize(dto, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        //Static Generic Json Deserializer, Runs on Game Decendent Factory
-        protected static TASG FromJson(string json, Func<TASG> factory)
+        //Static Generic Json Deserializer, Runs on Game Decendent Parameterless Instantiator
+        protected static TASG FromJson(string json, Func<TASG> instantiate)
         {
             Data.ASGDTO<TMoveDTO> dto = JsonSerializer.Deserialize<Data.ASGDTO<TMoveDTO>>(json)
                 ?? throw new Exception("Failed Deserialization.");
-            TASG game = factory();
+            TASG game = instantiate();
             game.gameEvent   = dto.GameEvent;
             game.gameSite    = dto.GameSite;
             game.gameDate    = dto.GameDate;

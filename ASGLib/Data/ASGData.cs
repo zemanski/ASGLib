@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//Nested Data Namespace : ASG Data Types and Transfer Objects
+//Nested Data Namespace : ASG Data Types (To Be Expanded if Needed)
 namespace ASGLib.Data
 {
 

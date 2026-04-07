@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-//Nested Chess Namespace : Implementable Chess Match Class
+//Nested Chess Namespace : Chess Move and Move Data Transfer Object
 namespace ASGLib.Chess
 {
 
@@ -26,8 +26,37 @@ namespace ASGLib.Chess
     //Class for Chess Move : Parses Standardized Chess Move Format
     public class ChessMove : ASGMove<ChessMoveDTO>
     {
+        // --- CHESS MOVE MEMBERS ---
+        private bool isCapture;
+        private bool isPromotion;
+        private bool isCheck;
+        private bool isCheckmate;
+        private string comment;
+        private string piece;
+        private string destination;
+        private string disambiguation;
 
-        //Chess Move to DTO
+        // --- CHESS MOVE CONSTRUCTOR ---
+        internal ChessMove(string moveString) : base(moveString)
+        {
+            comment = "";
+            piece = "";
+            destination = "";
+            disambiguation = "";
+
+            MoveValidator();
+            SelfParse();
+        }
+
+        // --- CHESS MOVE VALIDATOR ---
+        private void MoveValidator()
+        {
+            string move = GetMove();
+            if (string.IsNullOrWhiteSpace(move)) throw new Exception("Move string cannot be empty.");
+            if (!Regex.IsMatch(move, @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$")) throw new Exception($"Invalid move format: {move}");
+        }
+
+        // --- CHESS MOVE SERIALIZER ---
         internal override ChessMoveDTO ToDTO()
         {
             return new ChessMoveDTO
@@ -46,115 +75,69 @@ namespace ASGLib.Chess
             };
         }
 
-        //Local Properties
-        private bool isCapture;
-        private bool isPromotion;
-        private bool isCheck;
-        private bool isCheckmate;
-        private string comment;
-
-        //Move Logic
-        private string piece;
-        private string destination;
-        private string disambiguation;
-
-        //Constructor
-        internal ChessMove(string moveString) : base(moveString)
+        // --- CHESS MOVE PARSING ---
+        private void SelfParse() // Parse Metadata and Pass Move Action
         {
-            comment         = "";
-            piece           = "";
-            destination     = "";
-            disambiguation  = "";
+            System.Text.RegularExpressions.Match match = 
+                Regex.Match(GetMove(), @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$");
 
-            MoveValidator();
-            SelfParse();
-        }
+            turnNum = int.Parse(match.Groups[1].Value);     // turn int
 
-        //PARSING//
-            //Extract Move Metadata
-            private void SelfParse()
-            {
-                //Find Move Match (Pre-Validated)
-                var match = Regex.Match(GetMove(), @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$");
-                if (!match.Success) throw new Exception("Failed to parse move.");
+            string dots = match.Groups[2].Value;            // "." or "..."
+            if (dots == ".") turnPlayer = "White";
+            else if (dots == "...") turnPlayer = "Black";
 
-                //Use Groups to Parse Metadata
-                turnNum = int.Parse(match.Groups[1].Value);
+            string move = match.Groups[3].Value.Trim();     // comment (or empty)
+            comment = match.Groups[4].Value;
 
-                string dots = match.Groups[2].Value; // "." or "..."
-                if (dots == ".") turnPlayer = "White";
-                else if (dots == "...") turnPlayer = "Black";
-
-                string move = match.Groups[3].Value.Trim();
-                comment = match.Groups[4].Value;
-
-                isCapture = move.Contains('x');
-                isCheckmate = move.Contains('#');
-                isCheck = !isCheckmate && move.Contains('+');
-                isPromotion = move.Contains('=');
+            isCapture = move.Contains('x');
+            isCheckmate = move.Contains('#');
+            isCheck = !isCheckmate && move.Contains('+');
+            isPromotion = move.Contains('=');
                 
-                //Parse Move Action
-                ParseMove(move);
-            }
-            
-            //Extract Move Action
-            private void ParseMove(String move)
-            {
-                //Remove Processed Metadata
-                move = move.Replace("+", "");
-                move = move.Replace("#", "");
-
-                // Handle castling
-                if (move.Contains("O-O-O"))
-                {
-                    piece = "King";
-                    destination = "CASTLE";
-                    disambiguation = "LONG";
-                    return;
-                }
-                if (move.Contains("O-O"))
-                {
-                    piece = "King";
-                    destination = "CASTLE";
-                    disambiguation = "SHORT";
-                    return;
-                }
-
-                //MIGHT BE REDUNDANT: Validation
-                var match = Regex.Match(move, @"^([KQRBN])?([a-h1-8]?)x?([a-h][1-8])(=([QRBN]))?$");
-                if (!match.Success) throw new Exception($"Invalid move structure: {move}");
-
-                //Parse By Groups
-                string pieceLetter = match.Groups[1].Value;
-                string disamb = match.Groups[2].Value;
-                string dest = match.Groups[3].Value;
-
-                piece = pieceLetter switch
-                {
-                    "K" => "King",
-                    "Q" => "Queen",
-                    "R" => "Rook",
-                    "B" => "Bishop",
-                    "N" => "Knight",
-                    "" => "Pawn",
-                    _ => throw new ArgumentException("Unknown piece type")
-                };
-
-                disambiguation = disamb;
-
-                destination = dest;
-            }
-
-        //Validator for Move Format
-        private void MoveValidator()
+            ParseMove(move);
+        }
+           
+        private void ParseMove(String move) // Extract Move Action
         {
-            string move = GetMove();
-            if (string.IsNullOrWhiteSpace(move)) throw new Exception("Move string cannot be empty.");
-            if (!Regex.IsMatch(move, @"^(\d+)(\.\.\.|\.{1})([^{}]+)\{([^{}]*)\}$")) throw new Exception($"Invalid move format: {move}");
+            move = move.Replace("+", ""); //Preprocessed
+            move = move.Replace("#", "");
+
+            if (move.Contains("O-O-O"))   //Castling
+            {
+                piece = "King";
+                destination = "CASTLE";
+                disambiguation = "LONG";
+                return;
+            }
+            if (move.Contains("O-O"))
+            {
+                piece = "King";
+                destination = "CASTLE";
+                disambiguation = "SHORT";
+                return;
+            }
+
+            System.Text.RegularExpressions.Match match = Regex.Match(move, @"^([KQRBN])?([a-h1-8]?)x?([a-h][1-8])(=([QRBN]))?$");
+
+            piece = match.Groups[1].Value switch
+            {
+                "K" => "King",
+                "Q" => "Queen",
+                "R" => "Rook",
+                "B" => "Bishop",
+                "N" => "Knight",
+                "" => "Pawn",
+                _ => throw new ArgumentException("Unknown piece type")
+            };
+
+            disambiguation = match.Groups[2].Value;
+
+            destination = match.Groups[3].Value;
         }
 
-        //Accessor for Move Metadata : Bool Overload
-        public static bool GetMoveData(ChessMove move, string property)
+        // --- CHESS MOVE ACCESSORS ---
+        public static bool GetMoveData(ChessMove move, string property) // boolean
         {
             switch (property.ToLower())
             {
@@ -170,9 +153,8 @@ namespace ASGLib.Chess
                     throw new Exception("Invalid property name");
             }
         }
-
-        //Accessor for Move Logic (subject to change pending controller design)
-        public static Dictionary<string, object> GetMoveData(ChessMove move)
+        
+        public static Dictionary<string, object> GetMoveData(ChessMove move) // action
         {
             return new Dictionary<string, object>
             {
@@ -184,16 +166,9 @@ namespace ASGLib.Chess
             };
         }
 
-        //Accessor for comment
-        public static string GetMoveComment(ChessMove move)
+        public static string GetMoveComment(ChessMove move) // comment
         {
             return move.comment;
-        }
-
-        //TEMPORARY: Expose Base MoveString Accessor
-        public string DEBUG_GetMove()
-        {
-            return GetMove();
         }
     }
 }
