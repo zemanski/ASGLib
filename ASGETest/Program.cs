@@ -1,4 +1,4 @@
-﻿namespace ASGETest
+﻿namespace ASGTest
 {
     internal class Program
     {
