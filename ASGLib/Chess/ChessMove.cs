@@ -166,7 +166,7 @@ namespace ASGLib.Chess
             };
         }
 
-        public static string GetMoveComment(ChessMove move) // comment
+        internal static string GetMoveComment(ChessMove move) // comment
         {
             return move.comment;
         }
