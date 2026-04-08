@@ -10,7 +10,7 @@ namespace ASGLib
 {
 
     //Abstract Class for an Abstract Strategy Game Move
-    public abstract class ASGMove<TMoveDTO> 
+    internal abstract class ASGMove<TMoveDTO> 
         where TMoveDTO : Data.ASGMoveDTO
     {
 

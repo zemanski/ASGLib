@@ -10,7 +10,7 @@ namespace ASGLib.Checkers
 {
 
     //Checkers Move Data Transfer Object
-    public class CheckersMoveDTO : Data.ASGMoveDTO
+    internal class CheckersMoveDTO : Data.ASGMoveDTO
     {
         public List<string> Steps { get; set; } = new();
         public bool IsJump { get; set; }
@@ -19,7 +19,7 @@ namespace ASGLib.Checkers
     }
 
     //Class for Checkers Move : Parses Standardized Checkers Move Format
-    public class CheckersMove : ASGMove<CheckersMoveDTO>
+    internal class CheckersMove : ASGMove<CheckersMoveDTO>
     {
 
         // --- CHECKERS MOVE DATA ---
@@ -142,7 +142,7 @@ namespace ASGLib.Checkers
         }
 
         // --- CHECKERS MOVE ACCESSORS ---
-        public static Dictionary<string, object> GetMoveData(CheckersMove move)
+        internal static Dictionary<string, object> GetMoveData(CheckersMove move)
         {
             return new Dictionary<string, object>
             {
@@ -154,7 +154,7 @@ namespace ASGLib.Checkers
             };
         }
 
-        public static string GetMoveComment(CheckersMove move)
+        internal static string GetMoveComment(CheckersMove move)
         {
             return move.comment;
         }
