@@ -10,7 +10,7 @@ namespace ASGLib.Othello
 {
 
     //Othello Move Data Transfer Object
-    public class OthelloMoveDTO : Data.ASGMoveDTO
+    internal class OthelloMoveDTO : Data.ASGMoveDTO
     {
         public string Square { get; set; } = "";
         public bool IsPass { get; set; }
@@ -18,7 +18,7 @@ namespace ASGLib.Othello
     }
 
     //Class for Othello Move : Parses Standardized Othello Move Format
-    public class OthelloMove : ASGMove<OthelloMoveDTO>
+    internal class OthelloMove : ASGMove<OthelloMoveDTO>
     {
         
         // --- OTHELLO MOVE DATA ---
@@ -95,7 +95,7 @@ namespace ASGLib.Othello
         }
 
         // --- OTHELLO MOVE ACCESSORS ---
-        public static Dictionary<string, object> GetMoveData(OthelloMove move)
+        internal static Dictionary<string, object> GetMoveData(OthelloMove move)
         {
             return new Dictionary<string, object>
             {
@@ -106,7 +106,7 @@ namespace ASGLib.Othello
             };
         }
 
-        public static string GetMoveComment(OthelloMove move)
+        internal static string GetMoveComment(OthelloMove move)
         {
             return move.comment;
         }

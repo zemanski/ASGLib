@@ -13,7 +13,7 @@ namespace ASGLib
 {
 
     //Abstract Class for an Abstract Strategy Game Match : Constrained by ASGMove's Decendants and Inputs as well as Decendant Class for Serialization/Deserialization
-    public abstract class ASG<TASG, TMove, TMoveDTO> 
+    internal abstract class ASG<TASG, TMove, TMoveDTO> 
         where TASG : ASG<TASG, TMove, TMoveDTO> 
         where TMove : ASGMove<TMoveDTO> 
         where TMoveDTO : ASGMoveDTO

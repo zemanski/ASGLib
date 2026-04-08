@@ -9,7 +9,7 @@ namespace ASGLib.Data
 {
 
     //Abstract ASGMove Base Data Transfer Object
-    public abstract class ASGMoveDTO
+    internal abstract class ASGMoveDTO
     {
         public string MoveString { get; set; } = "";
         public int TurnNum { get; set; }
