@@ -11,7 +11,7 @@ namespace ASGLib.Chess
 {
 
     //Chess Move Data Transfer Object
-    internal class ChessMoveDTO : Data.ASGMoveDTO
+    public class ChessMoveDTO : Data.ASGMoveDTO
     {
         public string Piece { get; set; } = "";
         public string Destination { get; set; } = "";
@@ -24,7 +24,7 @@ namespace ASGLib.Chess
     }
 
     //Class for Chess Move : Parses Standardized Chess Move Format
-    internal class ChessMove : ASGMove<ChessMoveDTO>
+    public class ChessMove : ASGMove<ChessMoveDTO>
     {
         // --- CHESS MOVE MEMBERS ---
         private bool isCapture;
@@ -137,7 +137,7 @@ namespace ASGLib.Chess
         }
 
         // --- CHESS MOVE ACCESSORS ---
-        internal static bool GetMoveData(ChessMove move, string property) // boolean
+        public static bool GetMoveData(ChessMove move, string property) // boolean
         {
             switch (property.ToLower())
             {
@@ -154,7 +154,7 @@ namespace ASGLib.Chess
             }
         }
         
-        internal static Dictionary<string, object> GetMoveData(ChessMove move) // action
+        public static Dictionary<string, object> GetMoveData(ChessMove move) // action
         {
             return new Dictionary<string, object>
             {

@@ -8,4 +8,11 @@ using System.Threading.Tasks;
 namespace ASGLib.Data
 {
 
+    //Enumerator for ASG FileType
+    public enum ASGFileType
+    {
+        ASGJson = 0,
+        PDNFile = 1,
+        PGNFile = 2
+    }
 }

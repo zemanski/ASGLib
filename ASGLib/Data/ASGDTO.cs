@@ -9,7 +9,7 @@ namespace ASGLib.Data
 {
 
     //ASG Generic Data Transfer Object
-    internal class ASGDTO<TMoveDTO> where TMoveDTO : ASGMoveDTO
+    public class ASGDTO<TMoveDTO> where TMoveDTO : ASGMoveDTO
     {
         public string GameEvent { get; set; } = "";
         public string GameSite { get; set; } = "";
